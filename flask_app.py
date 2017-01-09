@@ -200,9 +200,9 @@ def upfeatplay():
         attributes['valence'].append(str(featurelist[i]['valence']))
 
     df_att = pd.DataFrame.from_dict(attributes)
-    print df_att
+#    print df_att
     b = df_att.sort_values(GLOBAL['choice'][0])
-    print b
+#    print b
     data = json.dumps({'uris': list(b.uri)})
     playlist_api_endpoint = "https://api.spotify.com/v1/users/1217498016/playlists/3Fafmpj0dxo6SIF3w8wVNR/tracks"
     playlists_songs = requests.put(playlist_api_endpoint, data, headers=GLOBAL['authorization_header'])
