@@ -225,14 +225,18 @@ def search1():
         PLAYLIST['list1'] = []  
         username = request.form['Username']
         playlists = requests.get("https://api.spotify.com/v1/users/{}/playlists".format(username),headers = GLOBAL['authorization_header'])
-        textplaylists = json.loads(playlists.text)['items']
-        for i in range(0,len(textplaylists)):
-            USER['user_1'].append(str(textplaylists[i]['id']))
+        textplaylists = json.loads(playlists.text)      
+        if not 'items' in textplaylists:
+            continue
+        for i in range(0,len(textplaylists['items'])):
+            USER['user_1'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_1']:
             songs = requests.get("https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(username, j),headers = GLOBAL['authorization_header'])
-            textsongs = json.loads(songs.text)['items']
-            for k in range(0,len(textsongs)):
-                PLAYLIST['list1'].append(str(textsongs[k]['track']['uri']))
+            textsongs = json.loads(songs.text)
+            if not 'items' in textsongs:
+                continue
+            for k in range(0,len(textsongs['items'])):
+                PLAYLIST['list1'].append(str(textsongs['items'][k]['track']['uri']))
         print USER['user_1']
         print PLAYLIST['list1']
         return redirect(url_for('orpheus', _anchor = "accounts"))
