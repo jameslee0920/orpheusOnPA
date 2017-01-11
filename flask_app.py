@@ -38,7 +38,8 @@ SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
 
 
 # Server-side Parameters
-CLIENT_SIDE_URL = "http://3rdworldjuander.pythonanywhere.com"
+# CLIENT_SIDE_URL = "http://3rdworldjuander.pythonanywhere.com"
+CLIENT_SIDE_URL = "http://myorpheus.servemp3.com"
 #PORT = 5000
 #REDIRECT_URI = "{}:{}/callback/q".format(CLIENT_SIDE_URL, PORT)
 REDIRECT_URI = "{}/callback/q".format(CLIENT_SIDE_URL)
