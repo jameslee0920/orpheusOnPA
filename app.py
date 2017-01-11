@@ -25,7 +25,7 @@ PLAYLIST = {
     'list3': [],
     'list4': [],
     'list5': [],
-    'list6': []    
+    'list6': []
 }
 USER = {
     'user_1': [],
@@ -68,11 +68,15 @@ auth_query_parameters = {
 }
 def get_orpheus_playlist():
     users = []
-    for name, spotify_ids in USER.iteritems():
+    for name, spotify_ids in PLAYLIST.iteritems():
+        print name
+        print 'spotify ids'
+        print spotify_ids
         users.append(User(name, spotify_ids))
 
     orpheus = Orpheus(users)
-    return orpheus.get_playlist(num_tracks=50)['spotify_id']
+    tracks = orpheus.get_playlist(num_tracks=50)['spotify_id']
+    return tracks
 
 
 @app.route("/")
@@ -120,7 +124,7 @@ def orpheus():
 
 @app.route("/orpheus/player")
 def player():
-    playlist_api_endpoint = "https://api.spotify.com/v1/users/1217498016/playlists/3Fafmpj0dxo6SIF3w8wVNR/tracks"
+    playlist_api_endpoint = "https://api.spotify.com/v1/users/1212629687/playlists/3Y8jgnvFgyGdl4vR8PF79g/tracks"
     tracks = get_orpheus_playlist()
     data = json.dumps({'uris': list(tracks)})
     playlists_songs = requests.put(playlist_api_endpoint, data, headers=GLOBAL['authorization_header'])
@@ -163,7 +167,7 @@ def upfeatplay():
     }
 
 
-    features = requests.get("https://api.spotify.com/v1/audio-features/?ids="+ ",".join(idlist) ,headers = GLOBAL['authorization_header'])    
+    features = requests.get("https://api.spotify.com/v1/audio-features/?ids="+ ",".join(idlist) ,headers = GLOBAL['authorization_header'])
     featurelist = json.loads(features.text)['audio_features']
     for i in range(0,len(featurelist)):
         attributes['uri'].append(str(featurelist[i]['uri']))
@@ -198,7 +202,7 @@ def downfeatplay():
     }
 
 
-    features = requests.get("https://api.spotify.com/v1/audio-features/?ids="+ ",".join(idlist) ,headers = GLOBAL['authorization_header'])    
+    features = requests.get("https://api.spotify.com/v1/audio-features/?ids="+ ",".join(idlist) ,headers = GLOBAL['authorization_header'])
     featurelist = json.loads(features.text)['audio_features']
     for i in range(0,len(featurelist)):
         attributes['uri'].append(str(featurelist[i]['uri']))
@@ -216,19 +220,21 @@ def downfeatplay():
     data = json.dumps({'uris': list(b.uri)})
     playlist_api_endpoint = "https://api.spotify.com/v1/users/1217498016/playlists/3Fafmpj0dxo6SIF3w8wVNR/tracks"
     playlists_songs = requests.put(playlist_api_endpoint, data, headers=GLOBAL['authorization_header'])
-    sleep(1)   
+    sleep(1)
     return render_template("player.html")
 
 @app.route('/orpheus/user1', methods=['GET', 'POST'])
 def search1():
     if request.method == 'POST':
-        PLAYLIST['list1'] = []  
+        PLAYLIST['list1'] = []
         username = request.form['Username']
         playlists = requests.get("https://api.spotify.com/v1/users/{}/playlists".format(username),headers = GLOBAL['authorization_header'])
-        textplaylists = json.loads(playlists.text)      
-        if not 'items' in textplaylists:
-            continue
+        textplaylists = json.loads(playlists.text)
+
+        #if not 'items' in textplaylists:
+        #    continue
         for i in range(0,len(textplaylists['items'])):
+            print textplaylists['items'][i]['name']
             USER['user_1'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_1']:
             songs = requests.get("https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(username, j),headers = GLOBAL['authorization_header'])
@@ -241,13 +247,13 @@ def search1():
         print PLAYLIST['list1']
         return redirect(url_for('orpheus', _anchor = "accounts"))
 
-         
+
     return render_template("playlist.html")
 
 @app.route('/orpheus/user2', methods=['GET', 'POST'])
 def search2():
     if request.method == 'POST':
-        PLAYLIST['list2'] = []  
+        PLAYLIST['list2'] = []
         username = request.form['Username']
         playlists = requests.get("https://api.spotify.com/v1/users/{}/playlists".format(username),headers = GLOBAL['authorization_header'])
         textplaylists = json.loads(playlists.text)['items']
@@ -262,13 +268,13 @@ def search2():
         print PLAYLIST['list2']
         return redirect(url_for('orpheus', _anchor ="accounts"))
 
-         
+
     return render_template("playlist.html")
 
 @app.route('/orpheus/user3', methods=['GET', 'POST'])
 def search3():
     if request.method == 'POST':
-        PLAYLIST['list3'] = []  
+        PLAYLIST['list3'] = []
         username = request.form['Username']
         playlists = requests.get("https://api.spotify.com/v1/users/{}/playlists".format(username),headers = GLOBAL['authorization_header'])
         textplaylists = json.loads(playlists.text)['items']
@@ -283,13 +289,13 @@ def search3():
         print PLAYLIST['list3']
         return redirect(url_for('orpheus', _anchor ="accounts"))
 
-         
+
     return render_template("playlist.html")
 
 @app.route('/orpheus/user4', methods=['GET', 'POST'])
 def search4():
     if request.method == 'POST':
-        PLAYLIST['list4'] = []  
+        PLAYLIST['list4'] = []
         username = request.form['Username']
         playlists = requests.get("https://api.spotify.com/v1/users/{}/playlists".format(username),headers = GLOBAL['authorization_header'])
         textplaylists = json.loads(playlists.text)['items']
@@ -304,13 +310,13 @@ def search4():
         print PLAYLIST['list4']
         return redirect(url_for('orpheus', _anchor ="accounts"))
 
-         
+
     return render_template("playlist.html")
 
 @app.route('/orpheus/user5', methods=['GET', 'POST'])
 def search5():
     if request.method == 'POST':
-        PLAYLIST['list5'] = []  
+        PLAYLIST['list5'] = []
         username = request.form['Username']
         playlists = requests.get("https://api.spotify.com/v1/users/{}/playlists".format(username),headers = GLOBAL['authorization_header'])
         textplaylists = json.loads(playlists.text)['items']
@@ -325,13 +331,13 @@ def search5():
         print PLAYLIST['list5']
         return redirect(url_for('orpheus', _anchor ="accounts"))
 
-         
+
     return render_template("playlist.html")
 
 @app.route('/orpheus/user6', methods=['GET', 'POST'])
 def search6():
     if request.method == 'POST':
-        PLAYLIST['list6'] = []  
+        PLAYLIST['list6'] = []
         username = request.form['Username']
         playlists = requests.get("https://api.spotify.com/v1/users/{}/playlists".format(username),headers = GLOBAL['authorization_header'])
         textplaylists = json.loads(playlists.text)['items']
@@ -346,7 +352,7 @@ def search6():
         print PLAYLIST['list6']
         return redirect(url_for('orpheus', _anchor ="accounts"))
 
-         
+
     return render_template("playlist.html")
 
 
