@@ -39,8 +39,13 @@ USER = {
 app = Flask(__name__)
 
 #  Client Keys
+# James
 CLIENT_ID = "35a534a9bf1c446c9d9b0c6acd7f9aac"
 CLIENT_SECRET = "f26b4a6600de46419e98d45bc9b939fe"
+# Oamar (for testing purpose only)
+CLIENT_ID = "6fd8426e0d5842c8a71f5fb2fe500755"
+CLIENT_SECRET = "c8dd889c094b47f99e89ae221a29df9b"
+
 
 # Spotify URLS
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -51,9 +56,12 @@ SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
 
 
 # Server-side Parameters
-CLIENT_SIDE_URL = "http://127.0.0.1"
-PORT = 5000
-REDIRECT_URI = "{}:{}/callback/q".format(CLIENT_SIDE_URL, PORT)
+#CLIENT_SIDE_URL = "http://127.0.0.1"
+#CLIENT_SIDE_URL = "http://3rdworldjuander.pythonanywhere.com"
+CLIENT_SIDE_URL = "http://myorpheus.servemp3.com"
+#PORT = 5000
+#REDIRECT_URI = "{}:{}/callback/q".format(CLIENT_SIDE_URL, PORT)
+REDIRECT_URI = "{}/callback/q".format(CLIENT_SIDE_URL)
 SCOPE = "playlist-modify-public playlist-modify-private playlist-read-private"
 STATE = ""
 SHOW_DIALOG_bool = True
