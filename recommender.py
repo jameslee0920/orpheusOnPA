@@ -14,7 +14,7 @@ def spotify_ids_to_str(spotify_ids):
         return item['artists'][0]['name'] + " - " + item['name']
     return [to_str(item) for item in spotify.tracks(spotify_ids)['tracks']]
 
-PATH_TO_DATA = 'processed_data/'
+PATH_TO_DATA = '/home/3rdworldjuander/mysite/processed_data/'
 
 class Recommender(object):
     """Music recommender using collaborative filtering"""
