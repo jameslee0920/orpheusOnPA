@@ -42,13 +42,24 @@ USER = {
     'user_6': []
 }
 Displayname = {
-    'user_1': "",
-    'user_2': "",
-    'user_3': "",
-    'user_4': "",
-    'user_5': "",
-    'user_6': "",
+    'user_1': "User 1",
+    'user_2': "User 2",
+    'user_3': "User 3",
+    'user_4': "User 4",
+    'user_5': "User 5",
+    'user_6': "User 6",
 }
+
+IMAGES = {
+    'user_1': "static/img/portfolio/thumbnails/1.jpg",
+    'user_2': "static/img/portfolio/thumbnails/2.jpg",
+    'user_3': "static/img/portfolio/thumbnails/3.jpg",
+    'user_4': "static/img/portfolio/thumbnails/4.jpg",
+    'user_5': "static/img/portfolio/thumbnails/5.jpg",
+    'user_6': "static/img/portfolio/thumbnails/6.jpg",
+}
+
+
 
 RECOMMENDER = None
 
@@ -126,7 +137,6 @@ def index():
 
 @app.route("/callback/q")
 def callback():
-
     # Auth Step 4: Requests refresh and access tokens
     auth_token = request.args['code']
     code_payload = {
@@ -154,10 +164,6 @@ def callback():
     profile_data = json.loads(profile_response.text)
     LogInfo['username'] = profile_data['id']
     LogInfo['displayname'] = profile_data['display_name']
-    data = json.dumps({'name': 'OrpheusList'})
-    newlist = requests.post("https://api.spotify.com/v1/users/{}/playlists".format(LogInfo['username']), data, headers = GLOBAL['authorization_header'])
-    textnewlist = json.loads(newlist.text)
-    LogInfo['playlist'] = textnewlist['id']
     return redirect('/loading')
 
 
@@ -173,22 +179,43 @@ def load_orpheus():
 
 @app.route('/orpheus')
 def orpheus():
-    return render_template("index.html")
+    return render_template("index.html", images=IMAGES, names=Displayname, choice = GLOBAL['choice'][0].capitalize())
 
-@app.route("/orpheus/player")
-def player():
-    playlist_api_endpoint = "https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(LogInfo['username'], LogInfo['playlist'])
-    tracks = get_orpheus_playlist()
-    data = json.dumps({'uris': list(tracks)})
-    playlists_songs = requests.put(playlist_api_endpoint, data, headers=GLOBAL['authorization_header'])
-    src = "https://embed.spotify.com/?uri=spotify%3Auser%3A{}%3Aplaylist%3A{}&theme=white".format(LogInfo['username'], LogInfo['playlist'])
+
+def create_playlist():
+    """Create a playlist and return a list of names to display"""
+
+    # Get all the names
     Displayname_list = [Displayname['user_1'], Displayname['user_2'], Displayname['user_3'], Displayname['user_4'], Displayname['user_5'], Displayname['user_6']]
     namelist = []
     for itemname in Displayname_list:
-        if len(itemname) > 0:
+        if not itemname.startswith('User'):
             namelist.append(itemname)
     finallist= ", ".join(namelist)
-    return render_template("player.html", src = src, display = finallist, playertype = "Default Playlist")
+
+    # Create empty playlist
+    data = json.dumps({'name': 'Orpheus by {}'.format(finallist)})
+    newlist = requests.post("https://api.spotify.com/v1/users/{}/playlists".format(LogInfo['username']), data, headers = GLOBAL['authorization_header'])
+    textnewlist = json.loads(newlist.text)
+    LogInfo['playlist'] = textnewlist['id']
+    return finallist
+
+@app.route("/orpheus/player")
+def player():
+    # Create playlist
+    finallist = create_playlist()
+
+    # Getting tracks for playlist
+    tracks = get_orpheus_playlist()
+
+    # POST tracks to playlist
+    print tracks
+    playlist_api_endpoint = "https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(LogInfo['username'], LogInfo['playlist'])
+    data = json.dumps({'uris': list(tracks)})
+    playlists_songs = requests.put(playlist_api_endpoint, data, headers=GLOBAL['authorization_header'])
+    print playlists_songs
+    src = "https://embed.spotify.com/?uri=spotify%3Auser%3A{}%3Aplaylist%3A{}&theme=white".format(LogInfo['username'], LogInfo['playlist'])
+    return render_template("player.html", src = src, display = finallist, choice = "", playertype = "Default")
 
 @app.route("/orpheus/energy")
 def energychoice():
@@ -214,7 +241,13 @@ def valencechoice():
 
 @app.route("/orpheus/player/up")
 def upfeatplay():
+    # Create playlist
+    finallist = create_playlist()
+
+    # Get tracks for playlist
     tracks = get_orpheus_playlist()
+
+    # Collect attributes
     idlist = [x[14:] for x in list(tracks)]
 
     attributes= {
@@ -238,20 +271,22 @@ def upfeatplay():
     df_att = pd.DataFrame.from_dict(attributes)
     b = df_att.sort_values(GLOBAL['choice'][0])
     data = json.dumps({'uris': list(b.uri)})
+
     playlist_api_endpoint = "https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(LogInfo['username'], LogInfo['playlist'])
     playlists_songs = requests.put(playlist_api_endpoint, data, headers=GLOBAL['authorization_header'])
-    Displayname_list = [Displayname['user_1'], Displayname['user_2'], Displayname['user_3'], Displayname['user_4'], Displayname['user_5'], Displayname['user_6']]
-    namelist = []
-    for itemname in Displayname_list:
-        if len(itemname) > 0:
-            namelist.append(itemname)
-    finallist= ", ".join(namelist)
+
     sleep(1)
     src = "https://embed.spotify.com/?uri=spotify%3Auser%3A{}%3Aplaylist%3A{}&theme=white".format(LogInfo['username'], LogInfo['playlist'])
-    return render_template("player.html", src = src, display = finallist, playertype = "Ascending Playlist")
+    return render_template("player.html", src = src, display = finallist, choice = GLOBAL['choice'][0].capitalize(), playertype = "Ascending")
 @app.route("/orpheus/player/down")
 def downfeatplay():
+    # Create playlist
+    finallist = create_playlist()
+
+    # Get tracks for playlist
     tracks = get_orpheus_playlist()
+
+    # Collect attributes
     idlist = [x[14:] for x in list(tracks)]
 
     attributes= {
@@ -281,12 +316,12 @@ def downfeatplay():
     Displayname_list = [Displayname['user_1'], Displayname['user_2'], Displayname['user_3'], Displayname['user_4'], Displayname['user_5'], Displayname['user_6']]
     namelist = []
     for itemname in Displayname_list:
-        if len(itemname) > 0:
+        if not itemname.startswith('User'):
             namelist.append(itemname)
     finallist= ", ".join(namelist)
     sleep(1)
     src = "https://embed.spotify.com/?uri=spotify%3Auser%3A{}%3Aplaylist%3A{}&theme=white".format(LogInfo['username'], LogInfo['playlist'])
-    return render_template("player.html", src = src, display = finallist, playertype = "Descending Playlist")
+    return render_template("player.html", src = src, display = finallist, choice = GLOBAL['choice'][0].capitalize(),playertype = "Descending")
 
 @app.route('/orpheus/user1', methods=['GET', 'POST'])
 def search1():
@@ -298,6 +333,7 @@ def search1():
         profileget = requests.get("https://api.spotify.com/v1/users/{}".format(username))
         profiletext = json.loads(profileget.text)
         Displayname['user_1'] = str(profiletext['display_name'])
+        IMAGES['user_1'] = profiletext['images'][0]['url']
         for i in range(0,len(textplaylists['items'])):
             USER['user_1'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_1']:
@@ -320,6 +356,7 @@ def search2():
         profileget = requests.get("https://api.spotify.com/v1/users/{}".format(username))
         profiletext = json.loads(profileget.text)
         Displayname['user_2'] = str(profiletext['display_name'])
+        IMAGES['user_2'] = profiletext['images'][0]['url']
         for i in range(0,len(textplaylists['items'])):
             USER['user_2'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_2']:
@@ -342,6 +379,7 @@ def search3():
         profileget = requests.get("https://api.spotify.com/v1/users/{}".format(username))
         profiletext = json.loads(profileget.text)
         Displayname['user_3'] = str(profiletext['display_name'])
+        IMAGES['user_3'] = profiletext['images'][0]['url']
         for i in range(0,len(textplaylists['items'])):
             USER['user_3'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_3']:
@@ -364,6 +402,7 @@ def search4():
         profileget = requests.get("https://api.spotify.com/v1/users/{}".format(username))
         profiletext = json.loads(profileget.text)
         Displayname['user_4'] = str(profiletext['display_name'])
+        IMAGES['user_4'] = profiletext['images'][0]['url']
         for i in range(0,len(textplaylists['items'])):
             USER['user_4'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_4']:
@@ -386,6 +425,7 @@ def search5():
         profileget = requests.get("https://api.spotify.com/v1/users/{}".format(username))
         profiletext = json.loads(profileget.text)
         Displayname['user_5'] = str(profiletext['display_name'])
+        IMAGES['user_5'] = profiletext['images'][0]['url']
         for i in range(0,len(textplaylists['items'])):
             USER['user_5'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_5']:
@@ -408,6 +448,7 @@ def search6():
         profileget = requests.get("https://api.spotify.com/v1/users/{}".format(username))
         profiletext = json.loads(profileget.text)
         Displayname['user_6'] = str(profiletext['display_name'])
+        IMAGES['user_6'] = profiletext['images'][0]['url']
         for i in range(0,len(textplaylists['items'])):
             USER['user_6'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_6']:

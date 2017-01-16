@@ -25,6 +25,10 @@
 
     <!-- Theme CSS -->
     <link href="static/css/creative.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="static/css/custom.css" rel="stylesheet">
+
     <!-- Icon UP and Down -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -77,9 +81,9 @@
     <header>
         <div class="header-content">
             <div class="header-content-inner">
-                <h1 id="homeHeading">Orpheus</h1>
+                <h1 id="homeHeading"><span style="background-color: rgba(0, 0, 0, 0.75)">Orpheus</span></h1>
                 <hr>
-                <p>Orpheus allows users to experience music as a group in a whole new experience</p>
+                <p style="background-color: rgba(0, 0, 0, 0.75)"">Orpheus allows users to experience music as a group in a whole new experience.</p>
                 <a href="#about" class="btn btn-primary btn-xl page-scroll">What is Orpheus?</a>
             </div>
         </div>
@@ -97,21 +101,21 @@
             </div>
         </div>
     </section>
-    
+
 
     <section class="no-padding" id="accounts">
         <div class="container-fluid">
             <div class="call-to-action">
                 <div class="col-lg-4 col-sm-6">
                     <a href= "{{ url_for('search1')}}" class="portfolio-box">
-                        <img src="static/img/portfolio/thumbnails/1.jpg" class="img-responsive" alt="">
+                        <img src="{{ images['user_1'] }}" class="img-responsive user-pic" alt="">
                         <div class="portfolio-box-caption">
                             <div class="portfolio-box-caption-content">
                                 <div class="project-category text-faded">
                                     Input
                                 </div>
                                 <div class="project-name">
-                                    User 1
+                                    {{ names['user_1']}}
                                 </div>
 
                             </div>
@@ -120,14 +124,14 @@
                 </div>
                 <div class="col-lg-4 col-sm-6">
                     <a href= "{{ url_for('search2')}}" class="portfolio-box">
-                        <img src="static/img/portfolio/thumbnails/2.jpg" class="img-responsive" alt="">
+                        <img src="{{ images['user_2'] }}" class="img-responsive user-pic" alt="">
                         <div class="portfolio-box-caption">
                             <div class="portfolio-box-caption-content">
                                 <div class="project-category text-faded">
                                     Input
                                 </div>
                                 <div class="project-name">
-                                    User 2
+                                    {{ names['user_2']}}
                                 </div>
                             </div>
                         </div>
@@ -135,14 +139,14 @@
                 </div>
                 <div class="col-lg-4 col-sm-6">
                     <a href= "{{ url_for('search3')}}" class="portfolio-box">
-                        <img src="static/img/portfolio/thumbnails/3.jpg" class="img-responsive" alt="">
+                        <img src="{{ images['user_3'] }}" class="img-responsive user-pic" alt="">
                         <div class="portfolio-box-caption">
                             <div class="portfolio-box-caption-content">
                                 <div class="project-category text-faded">
                                     Input
                                 </div>
                                 <div class="project-name">
-                                    User 3
+                                   {{ names['user_3']}}
                                 </div>
                             </div>
                         </div>
@@ -150,14 +154,14 @@
                 </div>
                 <div class="col-lg-4 col-sm-6">
                     <a href= "{{ url_for('search4')}}" class="portfolio-box">
-                        <img src="static/img/portfolio/thumbnails/4.jpg" class="img-responsive" alt="">
+                        <img src="{{ images['user_4'] }}" class="img-responsive user-pic" alt="">
                         <div class="portfolio-box-caption">
                             <div class="portfolio-box-caption-content">
                                 <div class="project-category text-faded">
                                     Input
                                 </div>
                                 <div class="project-name">
-                                    User 4
+                                    {{ names['user_4']}}
                                 </div>
                             </div>
                         </div>
@@ -165,14 +169,14 @@
                 </div>
                 <div class="col-lg-4 col-sm-6">
                     <a href= "{{ url_for('search5')}}" class="portfolio-box">
-                        <img src="static/img/portfolio/thumbnails/5.jpg" class="img-responsive" alt="">
+                        <img src="{{ images['user_5'] }}" class="img-responsive user-pic" alt="">
                         <div class="portfolio-box-caption">
                             <div class="portfolio-box-caption-content">
                                 <div class="project-category text-faded">
                                     Input
                                 </div>
                                 <div class="project-name">
-                                    User 5
+                                    {{ names['user_5']}}
                                 </div>
                             </div>
                         </div>
@@ -180,19 +184,19 @@
                 </div>
                 <div class="col-lg-4 col-sm-6">
                     <a href= "{{ url_for('search6')}}" class="portfolio-box">
-                        <img src="static/img/portfolio/thumbnails/6.jpg" class="img-responsive" alt="">
+                        <img src="{{ images['user_6'] }}" class="img-responsive user-pic" alt="">
                         <div class="portfolio-box-caption">
                             <div class="portfolio-box-caption-content">
                                 <div class="project-category text-faded">
                                     Input
                                 </div>
                                 <div class="project-name">
-                                    User 6
+                                    {{ names['user_6']}}
                                 </div>
                             </div>
                         </div>
                     </a>
-                </div>                                
+                </div>
              </div>
         </div>
     </section>
@@ -209,7 +213,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-3 col-md-6 text-center">
-                    <div class="service-box">
+                    <div class="service-box"
+                        {%if choice is equalto 'Energy'%}
+                            style="background-color: rgba(0, 0, 0, 0.25);"
+                        {% endif %}
+                    >
                         <a href = "{{ url_for('energychoice')}}">
                             <span class="glyphicon glyphicon-flash fa-5x"></span>
                         </a>
@@ -217,33 +225,45 @@
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 text-center">
-                    <div class="service-box">
+                    <div class="service-box"
+                        {%if choice is equalto 'Liveness'%}
+                            style="background-color: rgba(0, 0, 0, 0.25);"
+                        {% endif %}
+                    >
                         <a href = "{{ url_for('livenesschoice')}}">
                             <span class="glyphicon glyphicon-headphones fa-5x"></span>
-                        </a>                        
+                        </a>
                         <h3>Liveness</h3>
                     </div>
                 </div>
-                <div class="col-lg-3 col-md-6 text-center">
+                <div class="col-lg-3 col-md-6 text-center"
+                {%if choice is equalto 'Tempo'%}
+                    style="background-color: rgba(0, 0, 0, 0.25);"
+                {% endif %}
+                >
                     <div class="service-box">
                         <a href = "{{ url_for('tempochoice')}}">
                             <span class="glyphicon glyphicon-music fa-5x"></span>
-                        </a>                        
+                        </a>
                         <h3>Tempo</h3>
                     </div>
                 </div>
                 <div class="col-lg-3 col-md-6 text-center">
-                    <div class="service-box">
+                    <div class="service-box"
+                {%if choice is equalto 'Valence'%}
+                    style="background-color: rgba(0, 0, 0, 0.25);"
+                {% endif %}
+                    >
                         <a href = "{{ url_for('valencechoice')}}">
                             <span class="glyphicon glyphicon-heart fa-5x"></span>
-                        </a>                        
+                        </a>
                         <h3>Mood</h3>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    
+
 	<section id = "player">
 		<aside class="bg-dark">
 			<div class="container text-center">
@@ -256,7 +276,7 @@
                 <div class="col-lg-8 col-lg-offset-2 text-center">
                     <div class="call-to-action">
                         <h3>Ordered Player</h3>
-                        <p>Descending Order of Choice:
+                        <p>Descending Order of {{ choice }} :
                             <a href="{{ url_for('downfeatplay')}}" class="btn btn-info btn-lg">
                                 <span class="glyphicon glyphicon-import"></span> Launch Player
                             </a>
@@ -266,11 +286,11 @@
                 <div class="col-lg-8 col-lg-offset-2 text-center">
                     <div class="call-to-action">
                         <h3>Ordered Player</h3>
-                        <p>Ascending Order of Choice:
+                        <p>Ascending Order of {{ choice }}:
                             <a href="{{ url_for('upfeatplay')}}" class="btn btn-info btn-lg">
                                 <span class="glyphicon glyphicon-export"></span> Launch Player
                             </a>
-                        </p> 
+                        </p>
 			        </div>
                 </div>
             </div>
@@ -279,17 +299,13 @@
 
     <section id="contact">
         <div class="container">
-            <div class="row">	
+            <div class="row">
                 <div class="col-lg-8 col-lg-offset-2 text-center">
                     <h2 class="section-heading">Contact Us! - Dummy Variables</h2>
                     <hr class="primary">
                     <p>Feedbacks? Bugs? Please let us know!</p>
                 </div>
-                <div class="col-lg-4 col-lg-offset-2 text-center">
-                    <i class="fa fa-phone fa-3x sr-contact"></i>
-                    <p>XXX-XXX-XXXX</p>
-                </div>
-                <div class="col-lg-4 text-center">
+                <div class="col-lg-12 text-center">
                     <i class="fa fa-envelope-o fa-3x sr-contact"></i>
                     <p><a href="mailto:maogianan@gmail.com">Oamar Gianan</a></p>
                     <p><a href="mailto:jameslee0920@gmail.com">James Lee</a></p>
