@@ -50,6 +50,8 @@ Displayname = {
     'user_6': "",
 }
 
+RECOMMENDER = None
+
 
 app = Flask(__name__)
 
@@ -58,8 +60,8 @@ app = Flask(__name__)
 CLIENT_ID = "35a534a9bf1c446c9d9b0c6acd7f9aac"
 CLIENT_SECRET = "f26b4a6600de46419e98d45bc9b939fe"
 # Oamar (for testing purpose only)
-CLIENT_ID = "6fd8426e0d5842c8a71f5fb2fe500755"
-CLIENT_SECRET = "c8dd889c094b47f99e89ae221a29df9b"
+#CLIENT_ID = "6fd8426e0d5842c8a71f5fb2fe500755"
+#CLIENT_SECRET = "c8dd889c094b47f99e89ae221a29df9b"
 
 # Spotify URLS
 SPOTIFY_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -70,12 +72,29 @@ SPOTIFY_API_URL = "{}/{}".format(SPOTIFY_API_BASE_URL, API_VERSION)
 
 
 # Server-side Parameters
+LOCAL = True
+if LOCAL:
+    # James
+    CLIENT_ID = "35a534a9bf1c446c9d9b0c6acd7f9aac"
+    CLIENT_SECRET = "f26b4a6600de46419e98d45bc9b939fe"
+    CLIENT_SIDE_URL = "http://127.0.0.1"
+    PORT = 5000
+    REDIRECT_URI = "{}:{}/callback/q".format(CLIENT_SIDE_URL, PORT)
+    PATH_TO_DATA = 'processed_data/'
+else:
+    # Oamar (for testing purpose only)
+    CLIENT_ID = "6fd8426e0d5842c8a71f5fb2fe500755"
+    CLIENT_SECRET = "c8dd889c094b47f99e89ae221a29df9b"
+    CLIENT_SIDE_URL = "http://myorpheus.servemp3.com"
+    REDIRECT_URI = "{}/callback/q".format(CLIENT_SIDE_URL)
+    PATH_TO_DATA = '/home/3rdworldjuander/mysite/processed_data/'
+
 #CLIENT_SIDE_URL = "http://127.0.0.1"
 #CLIENT_SIDE_URL = "http://3rdworldjuander.pythonanywhere.com"
-CLIENT_SIDE_URL = "http://myorpheus.servemp3.com"
+#CLIENT_SIDE_URL = "http://myorpheus.servemp3.com"
 #PORT = 5000
 #REDIRECT_URI = "{}:{}/callback/q".format(CLIENT_SIDE_URL, PORT)
-REDIRECT_URI = "{}/callback/q".format(CLIENT_SIDE_URL)
+#REDIRECT_URI = "{}/callback/q".format(CLIENT_SIDE_URL)
 SCOPE = "playlist-modify-public playlist-modify-private playlist-read-private"
 STATE = ""
 SHOW_DIALOG_bool = True
@@ -91,13 +110,10 @@ auth_query_parameters = {
 def get_orpheus_playlist():
     users = []
     for name, spotify_ids in PLAYLIST.iteritems():
-        print name
-        print 'spotify ids'
-        print spotify_ids
         users.append(User(name, spotify_ids))
 
-    orpheus = Orpheus(users)
-    tracks = orpheus.get_playlist(num_tracks=50)['spotify_id']
+    # orpheus = Orpheus(users, PATH_TO_DATA)
+    tracks = RECOMMENDER.get_playlist(users, num_tracks=50)['spotify_id']
     return tracks
 
 
@@ -110,6 +126,7 @@ def index():
 
 @app.route("/callback/q")
 def callback():
+
     # Auth Step 4: Requests refresh and access tokens
     auth_token = request.args['code']
     code_payload = {
@@ -137,13 +154,24 @@ def callback():
     profile_data = json.loads(profile_response.text)
     LogInfo['username'] = profile_data['id']
     LogInfo['displayname'] = profile_data['display_name']
-    data =  json.dumps({'name': 'OrpheusList'})
+    data = json.dumps({'name': 'OrpheusList'})
     newlist = requests.post("https://api.spotify.com/v1/users/{}/playlists".format(LogInfo['username']), data, headers = GLOBAL['authorization_header'])
     textnewlist = json.loads(newlist.text)
     LogInfo['playlist'] = textnewlist['id']
-    return redirect("/orpheus")
+    return redirect('/loading')
 
-@app.route("/orpheus")
+
+@app.route('/loading')
+def loading():
+    return render_template("loading.html")
+
+@app.route('/load_orpheus')
+def load_orpheus():
+    global RECOMMENDER
+    RECOMMENDER = Orpheus(PATH_TO_DATA)
+    return render_template("index.html")
+
+@app.route('/orpheus')
 def orpheus():
     return render_template("index.html")
 
@@ -207,9 +235,7 @@ def upfeatplay():
         attributes['key'].append(str(featurelist[i]['key']))
         attributes['valence'].append(float(featurelist[i]['valence']))
     df_att = pd.DataFrame.from_dict(attributes)
-    print df_att
     b = df_att.sort_values(GLOBAL['choice'][0])
-    print b
     data = json.dumps({'uris': list(b.uri)})
     playlist_api_endpoint = "https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(LogInfo['username'], LogInfo['playlist'])
     playlists_songs = requests.put(playlist_api_endpoint, data, headers=GLOBAL['authorization_header'])
@@ -245,9 +271,7 @@ def downfeatplay():
         attributes['key'].append(str(featurelist[i]['key']))
         attributes['valence'].append(float(featurelist[i]['valence']))
     df_att = pd.DataFrame.from_dict(attributes)
-    print df_att
     b = df_att.sort_values(GLOBAL['choice'][0], ascending = False)
-    print b
 
     data = json.dumps({'uris': list(b.uri)})
     playlist_api_endpoint = "https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(LogInfo['username'], LogInfo['playlist'])
@@ -273,7 +297,6 @@ def search1():
         profiletext = json.loads(profileget.text)
         Displayname['user_1'] = str(profiletext['display_name'])
         for i in range(0,len(textplaylists['items'])):
-            print textplaylists['items'][i]['name']
             USER['user_1'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_1']:
             songs = requests.get("https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(username, j),headers = GLOBAL['authorization_header'])
@@ -296,7 +319,6 @@ def search2():
         profiletext = json.loads(profileget.text)
         Displayname['user_2'] = str(profiletext['display_name'])
         for i in range(0,len(textplaylists['items'])):
-            print textplaylists['items'][i]['name']
             USER['user_2'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_2']:
             songs = requests.get("https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(username, j),headers = GLOBAL['authorization_header'])
@@ -319,7 +341,6 @@ def search3():
         profiletext = json.loads(profileget.text)
         Displayname['user_3'] = str(profiletext['display_name'])
         for i in range(0,len(textplaylists['items'])):
-            print textplaylists['items'][i]['name']
             USER['user_3'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_3']:
             songs = requests.get("https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(username, j),headers = GLOBAL['authorization_header'])
@@ -342,7 +363,6 @@ def search4():
         profiletext = json.loads(profileget.text)
         Displayname['user_4'] = str(profiletext['display_name'])
         for i in range(0,len(textplaylists['items'])):
-            print textplaylists['items'][i]['name']
             USER['user_4'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_4']:
             songs = requests.get("https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(username, j),headers = GLOBAL['authorization_header'])
@@ -365,7 +385,6 @@ def search5():
         profiletext = json.loads(profileget.text)
         Displayname['user_5'] = str(profiletext['display_name'])
         for i in range(0,len(textplaylists['items'])):
-            print textplaylists['items'][i]['name']
             USER['user_5'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_5']:
             songs = requests.get("https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(username, j),headers = GLOBAL['authorization_header'])
@@ -388,7 +407,6 @@ def search6():
         profiletext = json.loads(profileget.text)
         Displayname['user_6'] = str(profiletext['display_name'])
         for i in range(0,len(textplaylists['items'])):
-            print textplaylists['items'][i]['name']
             USER['user_6'].append(str(textplaylists['items'][i]['id']))
         for j in USER['user_6']:
             songs = requests.get("https://api.spotify.com/v1/users/{}/playlists/{}/tracks".format(username, j),headers = GLOBAL['authorization_header'])

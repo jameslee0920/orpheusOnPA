@@ -4,17 +4,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
-import spotipy
 
-spotify = spotipy.Spotify()
-def spotify_ids_to_str(spotify_ids):
-    def to_str(item):
-        if not item:
-            return "NA"
-        return item['artists'][0]['name'] + " - " + item['name']
-    return [to_str(item) for item in spotify.tracks(spotify_ids)['tracks']]
-
-PATH_TO_DATA = '/home/3rdworldjuander/mysite/processed_data/'
 
 class Recommender(object):
     """Music recommender using collaborative filtering"""
@@ -24,9 +14,10 @@ class Recommender(object):
     LAMBDA = 1.0
     ALPHA = 40.0
 
-    def __init__(self):
+    def __init__(self, path_to_data):
         """Load model data"""
 
+        self.path_to_data = path_to_data
         self.product_features = self.load_product_features()
         self.product_features_mapping = [feature[0] for feature in self.product_features]
         self.Y = self.build_item_matrix(self.product_features)
@@ -52,7 +43,7 @@ class Recommender(object):
     def load_product_features(self):
         """Load the model's latent product matrix"""
 
-        path_to_product_features = os.path.join(PATH_TO_DATA, 'product_features.p')
+        path_to_product_features = os.path.join(self.path_to_data, 'product_features.p')
         product_features = pickle.load(open(path_to_product_features, 'rb'))
         return product_features
 
@@ -98,10 +89,10 @@ class Recommender(object):
 class Mapper(object):
     """Mapper for different song ids"""
 
-    def __init__(self):
+    def __init__(self, path_to_data):
         """Load the mappings"""
 
-        path_to_mappings = os.path.join(PATH_TO_DATA, 'song_mappings.csv')
+        path_to_mappings = os.path.join(path_to_data, 'song_mappings.csv')
         self.mappings = pd.read_csv(path_to_mappings, names=['msd_id', 'spotify_id', 'model_id'])
 
     def model_to_spotify(self, model_ids, how='inner'):
@@ -115,8 +106,6 @@ class Mapper(object):
         """Map spotify ids to model ids"""
 
         df = pd.DataFrame(spotify_ids, columns=['spotify_id'])
-
-        #print df.merge(self.mappings, on='spotify_id', how=how)
 
         return df.merge(self.mappings, on='spotify_id', how=how)['model_id']
 
@@ -148,16 +137,15 @@ def normalize(df):
 class Orpheus(object):
     """Multi-user Music Recommendation System"""
 
-    def __init__(self, users):
+    def __init__(self, path_to_data):
         """
         :param users: A list of users
         """
 
-        self.users = users
-        self.model = Recommender()
-        self.mapper = Mapper()
+        self.model = Recommender(path_to_data)
+        self.mapper = Mapper(path_to_data)
 
-    def get_playlist(self, agg_strategy='avg', num_tracks=10):
+    def get_playlist(self, users, agg_strategy='avg', num_tracks=10):
         """
         Create the playlist using the given aggregation strategy on the user's
         individual recommendations.
@@ -172,12 +160,8 @@ class Orpheus(object):
 
         # Get recommendations for each user
         recs_by_user = {}
-        for user in self.users:
-            print 'SPOTIFY IDS:'
-            print user.spotify_ids
+        for user in users:
             song_ids = self.mapper.spotify_to_model(user.spotify_ids)
-            print 'SONG IDS:'
-            print song_ids
             user_ratings = {s: 1000.0 for s in song_ids}
             recs_by_user[user.name] = self.model.get_recommendations(user_ratings)
 
@@ -187,9 +171,6 @@ class Orpheus(object):
         # Add Spotify mappings
         agg_recs_spotify = self.mapper.merge_spotify(agg_recs.reset_index(), 'index')
         agg_recs_spotify = agg_recs_spotify[:num_tracks]
-        agg_recs_spotify['track'] = spotify_ids_to_str(agg_recs_spotify['spotify_id'])
-
-        print agg_recs_spotify
 
         return agg_recs_spotify
 
