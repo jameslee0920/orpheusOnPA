@@ -169,7 +169,7 @@ def loading():
 def load_orpheus():
     global RECOMMENDER
     RECOMMENDER = Orpheus(PATH_TO_DATA)
-    return render_template("index.html")
+    return redirect('/orpheus')
 
 @app.route('/orpheus')
 def orpheus():
