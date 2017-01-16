@@ -227,6 +227,7 @@ def upfeatplay():
     }
     features = requests.get("https://api.spotify.com/v1/audio-features/?ids="+ ",".join(idlist) ,headers = GLOBAL['authorization_header'])
     featurelist = json.loads(features.text)['audio_features']
+    featurelist = filter(lambda x: x!=None, featurelist)
     for i in range(0,len(featurelist)):
         attributes['uri'].append(str(featurelist[i]['uri']))
         attributes['energy'].append(float(featurelist[i]['energy']))
@@ -263,6 +264,7 @@ def downfeatplay():
     }
     features = requests.get("https://api.spotify.com/v1/audio-features/?ids="+ ",".join(idlist) ,headers = GLOBAL['authorization_header'])
     featurelist = json.loads(features.text)['audio_features']
+    featurelist = filter(lambda x: x!=None, featurelist)
     for i in range(0,len(featurelist)):
         attributes['uri'].append(str(featurelist[i]['uri']))
         attributes['energy'].append(float(featurelist[i]['energy']))
