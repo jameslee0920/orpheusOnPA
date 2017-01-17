@@ -175,6 +175,44 @@ def loading():
 def load_orpheus():
     global RECOMMENDER
     RECOMMENDER = Orpheus(PATH_TO_DATA)
+
+    global PLAYLIST
+    PLAYLIST = {
+    'list1': [],
+    'list2': [],
+    'list3': [],
+    'list4': [],
+    'list5': [],
+    'list6': []
+    }
+    global USER
+    USER = {
+        'user_1': [],
+        'user_2': [],
+        'user_3': [],
+        'user_4': [],
+        'user_5': [],
+        'user_6': []
+    }
+    global Displayname
+    Displayname = {
+        'user_1': "User 1",
+        'user_2': "User 2",
+        'user_3': "User 3",
+        'user_4': "User 4",
+        'user_5': "User 5",
+        'user_6': "User 6",
+    }
+
+    global IMAGES
+    IMAGES = {
+        'user_1': "static/img/portfolio/thumbnails/1.jpg",
+        'user_2': "static/img/portfolio/thumbnails/2.jpg",
+        'user_3': "static/img/portfolio/thumbnails/3.jpg",
+        'user_4': "static/img/portfolio/thumbnails/4.jpg",
+        'user_5': "static/img/portfolio/thumbnails/5.jpg",
+        'user_6': "static/img/portfolio/thumbnails/6.jpg",
+    }
     return redirect('/orpheus')
 
 @app.route('/orpheus')
